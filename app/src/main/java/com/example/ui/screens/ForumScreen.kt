@@ -35,6 +35,7 @@ fun ForumScreen(
     onAddReply: (String, String) -> Unit,
     onCreatePost: (String, String, String, String?, String?) -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     val context = LocalContext.current
     var selectedCategory by remember { mutableStateOf("All") }
     var showCreatePostDialog by remember { mutableStateOf(false) }
@@ -51,13 +52,13 @@ fun ForumScreen(
                 onClick = { showCreatePostDialog = true },
                 icon = { Icon(Icons.Default.PostAdd, contentDescription = "Share Resource") },
                 text = { Text("Share / Discuss") },
-                containerColor = PastelLavenderPrimary,
-                contentColor = Color.White,
+                containerColor = colors.lavenderPrimary,
+                contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.testTag("create_post_fab")
             )
         },
-        containerColor = PastelBackground
+        containerColor = colors.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -77,13 +78,13 @@ fun ForumScreen(
                     Text(
                         text = "Peer Study & Resource Forum",
                         style = MaterialTheme.typography.displaySmall,
-                        color = PastelLavenderPrimary,
+                        color = colors.lavenderPrimary,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Collaborative study sessions, Drive notes & lab solutions with classmates",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -103,15 +104,15 @@ fun ForumScreen(
                             label = { Text(cat) },
                             shape = RoundedCornerShape(16.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = PastelLavenderPrimary,
-                                selectedLabelColor = Color.White,
-                                containerColor = PastelSurface,
-                                labelColor = PastelTextSecondary
+                                selectedContainerColor = colors.lavenderPrimary,
+                                selectedLabelColor = if (colors.isDark) Color(0xFF1B1429) else Color.White,
+                                containerColor = colors.surface,
+                                labelColor = colors.textSecondary
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
                                 selected = isSelected,
-                                borderColor = if (isSelected) PastelLavenderPrimary else PastelSurfaceOutline
+                                borderColor = if (isSelected) colors.lavenderPrimary else colors.outline
                             )
                         )
                     }
@@ -126,7 +127,10 @@ fun ForumScreen(
                     onToggleLike = { onToggleLike(post.id) },
                     onAddReply = { text -> onAddReply(post.id, text) },
                     onOpenResource = { link ->
-                        Toast.makeText(context, "Opening resource: $link", Toast.LENGTH_SHORT).show()
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                        val clip = android.content.ClipData.newPlainText("Resource Link", link)
+                        clipboard?.setPrimaryClip(clip)
+                        Toast.makeText(context, "Copied resource link to clipboard: $link", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -195,7 +199,10 @@ fun ForumScreen(
                             showCreatePostDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.lavenderPrimary,
+                        contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White
+                    )
                 ) {
                     Text("Post to Forum")
                 }
@@ -217,6 +224,7 @@ fun ForumPostCard(
     onAddReply: (String) -> Unit,
     onOpenResource: (String) -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     var showReplies by remember { mutableStateOf(false) }
     var replyInput by remember { mutableStateOf("") }
 
@@ -226,9 +234,9 @@ fun ForumPostCard(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .testTag("forum_post_${post.id}"),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -246,15 +254,14 @@ fun ForumPostCard(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(PastelLavenderLight)
-                            .border(1.dp, PastelLavenderPrimary, CircleShape),
+                            .background(colors.lavenderLight),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = post.authorName.take(1),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = PastelLavenderPrimary
+                            color = colors.lavenderPrimary
                         )
                     }
 
@@ -266,18 +273,18 @@ fun ForumPostCard(
                                 text = post.authorName,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
-                                color = PastelPinkContainer,
+                                color = colors.pinkContainer,
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
                                     text = post.authorBadge,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontSize = 9.sp,
-                                    color = PastelPinkOnContainer,
+                                    color = colors.pinkOnContainer,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
@@ -286,19 +293,19 @@ fun ForumPostCard(
                         Text(
                             text = post.timeAgo,
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextMuted
+                            color = colors.textMuted
                         )
                     }
                 }
 
                 Surface(
-                    color = PastelLavenderContainer,
+                    color = colors.lavenderContainer,
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         text = post.category,
                         style = MaterialTheme.typography.labelSmall,
-                        color = PastelLavenderOnContainer,
+                        color = colors.lavenderOnContainer,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -312,7 +319,7 @@ fun ForumPostCard(
                 text = post.title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = PastelTextPrimary
+                color = colors.textPrimary
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -320,7 +327,7 @@ fun ForumPostCard(
             Text(
                 text = post.content,
                 style = MaterialTheme.typography.bodyMedium,
-                color = PastelTextSecondary,
+                color = colors.textSecondary,
                 lineHeight = 20.sp
             )
 
@@ -328,7 +335,7 @@ fun ForumPostCard(
             post.resourceName?.let { resName ->
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
-                    color = PastelSkyContainer,
+                    color = colors.skyContainer,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -342,24 +349,24 @@ fun ForumPostCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AttachFile, contentDescription = null, tint = PastelSkyBlue, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.AttachFile, contentDescription = null, tint = colors.skyPrimary, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
                                 Text(
                                     text = resName,
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = PastelSkyOnContainer
+                                    color = colors.skyOnContainer
                                 )
                                 Text(
                                     text = post.resourceLink ?: "Shared peer document",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = PastelTextSecondary,
+                                    color = colors.textSecondary,
                                     fontSize = 10.sp
                                 )
                             }
                         }
-                        Icon(Icons.Default.Download, contentDescription = "Download Resource", tint = PastelSkyBlue, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Download, contentDescription = "Download Resource", tint = colors.skyPrimary, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -381,14 +388,14 @@ fun ForumPostCard(
                         Icon(
                             imageVector = if (post.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Like",
-                            tint = if (post.isLiked) PastelBlushPink else PastelTextMuted,
+                            tint = if (post.isLiked) colors.pinkPrimary else colors.textMuted,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${post.likesCount}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (post.isLiked) PastelBlushPink else PastelTextSecondary,
+                            color = if (post.isLiked) colors.pinkPrimary else colors.textSecondary,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -398,12 +405,12 @@ fun ForumPostCard(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { showReplies = !showReplies }
                     ) {
-                        Icon(Icons.Default.ChatBubbleOutline, contentDescription = "Replies", tint = PastelTextMuted, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.ChatBubbleOutline, contentDescription = "Replies", tint = colors.textMuted, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${post.replies.size} replies",
                             style = MaterialTheme.typography.bodySmall,
-                            color = PastelTextSecondary
+                            color = colors.textSecondary
                         )
                     }
                 }
@@ -411,7 +418,7 @@ fun ForumPostCard(
                 Text(
                     text = if (showReplies) "Hide discussion ▲" else "View replies ▼",
                     style = MaterialTheme.typography.labelSmall,
-                    color = PastelLavenderPrimary,
+                    color = colors.lavenderPrimary,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { showReplies = !showReplies }
                 )
@@ -424,7 +431,7 @@ fun ForumPostCard(
                         .fillMaxWidth()
                         .padding(top = 14.dp)
                 ) {
-                    HorizontalDivider(color = PastelSurfaceOutline.copy(alpha = 0.5f))
+                    HorizontalDivider(color = colors.outline.copy(alpha = 0.5f))
                     Spacer(modifier = Modifier.height(10.dp))
 
                     post.replies.forEach { reply ->
@@ -437,7 +444,7 @@ fun ForumPostCard(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(PastelPinkContainer),
+                                    .background(colors.pinkContainer),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -445,7 +452,7 @@ fun ForumPostCard(
                                     style = MaterialTheme.typography.labelSmall,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = PastelBlushPink
+                                    color = colors.pinkPrimary
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -454,10 +461,10 @@ fun ForumPostCard(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(text = reply.authorName, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = PastelTextPrimary)
-                                    Text(text = reply.timeAgo, style = MaterialTheme.typography.labelSmall, color = PastelTextMuted, fontSize = 9.sp)
+                                    Text(text = reply.authorName, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = colors.textPrimary)
+                                    Text(text = reply.timeAgo, style = MaterialTheme.typography.labelSmall, color = colors.textMuted, fontSize = 9.sp)
                                 }
-                                Text(text = reply.content, style = MaterialTheme.typography.bodySmall, color = PastelTextSecondary)
+                                Text(text = reply.content, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                             }
                         }
                     }
@@ -486,7 +493,7 @@ fun ForumPostCard(
                                 }
                             }
                         ) {
-                            Icon(Icons.Default.Send, contentDescription = "Send Reply", tint = PastelLavenderPrimary)
+                            Icon(Icons.Default.Send, contentDescription = "Send Reply", tint = colors.lavenderPrimary)
                         }
                     }
                 }

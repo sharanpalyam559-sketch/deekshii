@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,9 @@ data class NavItem(
 
 @Composable
 fun MainScreen(viewModel: DeekshiiViewModel) {
+    val colors = DeekshiiTheme.colors
+    val isSystemDark = isSystemInDarkTheme()
+
     val showButterflyIntro by viewModel.showButterflyIntro.collectAsStateWithLifecycle()
     val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
     val profile by viewModel.profile.collectAsStateWithLifecycle()
@@ -42,6 +46,7 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
     val motivationalAlerts by viewModel.motivationalAlerts.collectAsStateWithLifecycle()
     val productivityTips by viewModel.productivityTips.collectAsStateWithLifecycle()
     val selectedScheduleDay by viewModel.selectedScheduleDay.collectAsStateWithLifecycle()
+    val selectedScheduleTab by viewModel.selectedScheduleTab.collectAsStateWithLifecycle()
     val selectedAcademicsTab by viewModel.selectedAcademicsTab.collectAsStateWithLifecycle()
 
     val pomodoroTotalSeconds by viewModel.pomodoroTotalSeconds.collectAsStateWithLifecycle()
@@ -73,7 +78,7 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
         Scaffold(
             bottomBar = {
                 NavigationBar(
-                    containerColor = PastelSurface,
+                    containerColor = colors.surface,
                     tonalElevation = 6.dp,
                     modifier = Modifier
                         .windowInsetsPadding(WindowInsets.navigationBars)
@@ -89,7 +94,7 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
                                 Icon(
                                     imageVector = item.icon,
                                     contentDescription = item.title,
-                                    tint = if (isSelected) PastelLavenderPrimary else PastelTextMuted
+                                    tint = if (isSelected) colors.lavenderPrimary else colors.textMuted
                                 )
                             },
                             label = {
@@ -98,22 +103,22 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     fontSize = 11.sp,
-                                    color = if (isSelected) PastelLavenderPrimary else PastelTextMuted
+                                    color = if (isSelected) colors.lavenderPrimary else colors.textMuted
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = PastelLavenderContainer,
-                                selectedIconColor = PastelLavenderPrimary,
-                                unselectedIconColor = PastelTextMuted,
-                                selectedTextColor = PastelLavenderPrimary,
-                                unselectedTextColor = PastelTextMuted
+                                indicatorColor = colors.lavenderContainer,
+                                selectedIconColor = colors.lavenderPrimary,
+                                unselectedIconColor = colors.textMuted,
+                                selectedTextColor = colors.lavenderPrimary,
+                                unselectedTextColor = colors.textMuted
                             ),
                             modifier = Modifier.testTag("nav_item_${item.title.lowercase()}")
                         )
                     }
                 }
             },
-            containerColor = PastelBackground
+            containerColor = colors.background
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -130,7 +135,9 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
                             examDeadlines = examDeadlines,
                             motivationalAlerts = motivationalAlerts,
                             onNavigate = { screen -> viewModel.navigateTo(screen) },
+                            onNavigateWithTab = { screen, tab -> viewModel.navigateToWithTab(screen, tab) },
                             onReplayButterfly = { viewModel.replayButterflyIntro() },
+                            onToggleTheme = { viewModel.toggleTheme(isSystemDark) },
                             onToggleTask = { taskId -> viewModel.toggleTask(taskId) }
                         )
                     }
@@ -140,6 +147,8 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
                             scheduleList = scheduleList,
                             selectedDay = selectedScheduleDay,
                             onSelectDay = { day -> viewModel.setScheduleDay(day) },
+                            activeSubTab = selectedScheduleTab,
+                            onSubTabChange = { tab -> viewModel.setScheduleTab(tab) },
                             dailyTasks = dailyTasks,
                             onToggleTask = { taskId -> viewModel.toggleTask(taskId) },
                             onAddTask = { title, cat, due, prio -> viewModel.addTask(title, cat, due, prio) },
@@ -188,6 +197,7 @@ fun MainScreen(viewModel: DeekshiiViewModel) {
                     AppScreen.PORTFOLIO -> {
                         PortfolioScreen(
                             profile = profile,
+                            onToggleTheme = { viewModel.toggleTheme(isSystemDark) },
                             onUpdateProfile = { name, roll, branch, col, cgpa, tgt, bio ->
                                 viewModel.updateStudentProfile(name, roll, branch, col, cgpa, tgt, bio)
                             }

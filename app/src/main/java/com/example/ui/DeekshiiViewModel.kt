@@ -43,6 +43,9 @@ class DeekshiiViewModel(
     private val _selectedScheduleDay = MutableStateFlow("Monday")
     val selectedScheduleDay: StateFlow<String> = _selectedScheduleDay.asStateFlow()
 
+    private val _selectedScheduleTab = MutableStateFlow(0) // 0: Timetable & Tasks, 1: Exam Deadlines
+    val selectedScheduleTab: StateFlow<Int> = _selectedScheduleTab.asStateFlow()
+
     private val _selectedAcademicsTab = MutableStateFlow(0) // 0: Subjects & Marks, 1: Diagrams & Visual Trends
     val selectedAcademicsTab: StateFlow<Int> = _selectedAcademicsTab.asStateFlow()
 
@@ -59,7 +62,19 @@ class DeekshiiViewModel(
     private val _pomodoroSessionsCompleted = MutableStateFlow(2)
     val pomodoroSessionsCompleted: StateFlow<Int> = _pomodoroSessionsCompleted.asStateFlow()
 
+    private val _isDarkTheme = MutableStateFlow<Boolean?>(true) // default to dark theme as requested
+    val isDarkTheme: StateFlow<Boolean?> = _isDarkTheme.asStateFlow()
+
     private var pomodoroJob: Job? = null
+
+    fun toggleTheme(systemIsDark: Boolean) {
+        val current = _isDarkTheme.value ?: systemIsDark
+        _isDarkTheme.value = !current
+    }
+
+    fun setThemePreference(isDark: Boolean?) {
+        _isDarkTheme.value = isDark
+    }
 
     fun dismissButterflyIntro() {
         _showButterflyIntro.value = false
@@ -73,8 +88,23 @@ class DeekshiiViewModel(
         _currentScreen.value = screen
     }
 
+    fun navigateToWithTab(screen: AppScreen, subTab: Int?) {
+        _currentScreen.value = screen
+        if (subTab != null) {
+            when (screen) {
+                AppScreen.SCHEDULE -> _selectedScheduleTab.value = subTab
+                AppScreen.ACADEMICS -> _selectedAcademicsTab.value = subTab
+                else -> Unit
+            }
+        }
+    }
+
     fun setScheduleDay(day: String) {
         _selectedScheduleDay.value = day
+    }
+
+    fun setScheduleTab(tabIndex: Int) {
+        _selectedScheduleTab.value = tabIndex
     }
 
     fun setAcademicsTab(tabIndex: Int) {

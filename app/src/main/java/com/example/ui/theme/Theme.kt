@@ -6,8 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.unit.dp
 
 private val LightColorScheme = lightColorScheme(
@@ -29,27 +30,29 @@ private val LightColorScheme = lightColorScheme(
     onSurface = PastelTextPrimary,
     surfaceVariant = PastelSurfaceVariant,
     onSurfaceVariant = PastelTextSecondary,
-    outline = PastelSurfaceOutline,
+    outline = PastelSurfaceOutline
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PastelLavenderPrimary,
-    onPrimary = PastelSurface,
-    primaryContainer = PastelLavenderDark,
-    onPrimaryContainer = PastelLavenderContainer,
-    secondary = PastelBlushPink,
-    onSecondary = PastelSurface,
-    secondaryContainer = PastelPinkOnContainer,
-    onSecondaryContainer = PastelPinkContainer,
-    tertiary = PastelSageMint,
-    onTertiary = PastelSurface,
-    background = PastelTextPrimary,
-    onBackground = PastelBackground,
-    surface = Color(0xFF352D42),
-    onSurface = PastelBackground,
-    surfaceVariant = Color(0xFF453C54),
-    onSurfaceVariant = PastelLavenderLight,
-    outline = Color(0xFF5E5470)
+    primary = DarkPastelLavenderPrimary,
+    onPrimary = DarkPastelBackground,
+    primaryContainer = DarkPastelLavenderContainer,
+    onPrimaryContainer = DarkPastelLavenderOnContainer,
+    secondary = DarkPastelBlushPink,
+    onSecondary = DarkPastelBackground,
+    secondaryContainer = DarkPastelPinkContainer,
+    onSecondaryContainer = DarkPastelPinkOnContainer,
+    tertiary = DarkPastelSageMint,
+    onTertiary = DarkPastelBackground,
+    tertiaryContainer = DarkPastelMintContainer,
+    onTertiaryContainer = DarkPastelMintOnContainer,
+    background = DarkPastelBackground,
+    onBackground = DarkPastelTextPrimary,
+    surface = DarkPastelSurface,
+    onSurface = DarkPastelTextPrimary,
+    surfaceVariant = DarkPastelSurfaceVariant,
+    onSurfaceVariant = DarkPastelTextSecondary,
+    outline = DarkPastelSurfaceOutline
 )
 
 val RoundedShapes = Shapes(
@@ -59,18 +62,28 @@ val RoundedShapes = Shapes(
     extraLarge = RoundedCornerShape(36.dp)
 )
 
+object DeekshiiTheme {
+    val colors: DeekshiiPalette
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalDeekshiiPalette.current
+}
+
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Keep pastel theme intact
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val palette = if (darkTheme) DarkDeekshiiPalette else LightDeekshiiPalette
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = RoundedShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalDeekshiiPalette provides palette) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = RoundedShapes,
+            content = content
+        )
+    }
 }

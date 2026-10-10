@@ -41,6 +41,7 @@ data class DashboardOptionItem(
     val containerColor: Color,
     val iconTint: Color,
     val targetScreen: AppScreen,
+    val targetSubTab: Int? = null,
     val badge: String? = null
 )
 
@@ -53,9 +54,13 @@ fun DashboardScreen(
     examDeadlines: List<ExamDeadline>,
     motivationalAlerts: List<MotivationalAlert>,
     onNavigate: (AppScreen) -> Unit,
+    onNavigateWithTab: (AppScreen, Int?) -> Unit = { screen, _ -> onNavigate(screen) },
     onReplayButterfly: () -> Unit,
+    onToggleTheme: () -> Unit = {},
     onToggleTask: (String) -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
+
     // Quick statistics
     val totalAttended = subjects.sumOf { it.attendedClasses }
     val totalClasses = subjects.sumOf { it.totalClasses }
@@ -76,53 +81,58 @@ fun DashboardScreen(
             title = "Daily Work Schedule",
             subtitle = "Timetable & lab sessions",
             icon = Icons.Default.CalendarToday,
-            containerColor = PastelLavenderContainer,
-            iconTint = PastelLavenderPrimary,
+            containerColor = colors.lavenderContainer,
+            iconTint = colors.lavenderPrimary,
             targetScreen = AppScreen.SCHEDULE,
+            targetSubTab = 0,
             badge = "${todaySchedule.size} Classes"
         ),
         DashboardOptionItem(
             title = "Exam Deadlines",
             subtitle = "Mid & sem exam countdown",
             icon = Icons.Default.Alarm,
-            containerColor = PastelPinkContainer,
-            iconTint = PastelBlushPink,
+            containerColor = colors.pinkContainer,
+            iconTint = colors.pinkPrimary,
             targetScreen = AppScreen.SCHEDULE,
+            targetSubTab = 1,
             badge = "${nearestExam?.daysRemaining ?: 0}d left"
         ),
         DashboardOptionItem(
             title = "Attendance Manager",
             subtitle = "75% Cutoff & bunk status",
             icon = Icons.Default.CheckCircle,
-            containerColor = PastelMintContainer,
-            iconTint = PastelSageMint,
+            containerColor = colors.mintContainer,
+            iconTint = colors.mintPrimary,
             targetScreen = AppScreen.ACADEMICS,
+            targetSubTab = 0,
             badge = "%.1f%%".format(overallAttendancePct)
         ),
         DashboardOptionItem(
             title = "Marks & Progress",
             subtitle = "Mid-1, Mid-2 & Internals",
             icon = Icons.Default.Grade,
-            containerColor = PastelPeachContainer,
-            iconTint = PastelPeach,
+            containerColor = colors.peachContainer,
+            iconTint = colors.peachPrimary,
             targetScreen = AppScreen.ACADEMICS,
+            targetSubTab = 0,
             badge = "${profile.cgpa} CGPA"
         ),
         DashboardOptionItem(
             title = "Diagrams & Trends",
             subtitle = "Visual attendance & marks",
             icon = Icons.Default.BarChart,
-            containerColor = PastelSkyContainer,
-            iconTint = PastelSkyBlue,
+            containerColor = colors.skyContainer,
+            iconTint = colors.skyPrimary,
             targetScreen = AppScreen.ACADEMICS,
+            targetSubTab = 1,
             badge = "Charts"
         ),
         DashboardOptionItem(
             title = "Classmate Study Forum",
             subtitle = "Shared notes, drive & code",
             icon = Icons.Default.Groups,
-            containerColor = PastelLavenderContainer,
-            iconTint = PastelLavenderDark,
+            containerColor = colors.lavenderContainer,
+            iconTint = colors.lavenderPrimary,
             targetScreen = AppScreen.FORUM,
             badge = "4 New"
         ),
@@ -130,8 +140,8 @@ fun DashboardScreen(
             title = "Productivity Hub",
             subtitle = "Pomodoro timer & study tips",
             icon = Icons.Default.Timer,
-            containerColor = PastelMintContainer,
-            iconTint = PastelSageMint,
+            containerColor = colors.mintContainer,
+            iconTint = colors.mintPrimary,
             targetScreen = AppScreen.PRODUCTIVITY,
             badge = "25m Focus"
         ),
@@ -139,8 +149,8 @@ fun DashboardScreen(
             title = "Student Portfolio",
             subtitle = "Deekshitha's profile & skills",
             icon = Icons.Default.Person,
-            containerColor = PastelPinkContainer,
-            iconTint = PastelBlushPink,
+            containerColor = colors.pinkContainer,
+            iconTint = colors.pinkPrimary,
             targetScreen = AppScreen.PORTFOLIO,
             badge = "CSE-6"
         )
@@ -149,7 +159,7 @@ fun DashboardScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(PastelBackground)
+            .background(colors.background)
             .testTag("dashboard_screen"),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
@@ -178,8 +188,8 @@ fun DashboardScreen(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.45f),
-                                    PastelBackground.copy(alpha = 0.92f)
+                                    if (colors.isDark) Color(0xFF13101A).copy(alpha = 0.45f) else Color.White.copy(alpha = 0.45f),
+                                    colors.background.copy(alpha = 0.94f)
                                 )
                             )
                         )
@@ -198,28 +208,57 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Replay Butterfly Animation Button
-                        FilledTonalButton(
-                            onClick = onReplayButterfly,
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color.White.copy(alpha = 0.85f),
-                                contentColor = PastelLavenderPrimary
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            modifier = Modifier.testTag("replay_butterfly_button")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.FilterVintage,
-                                contentDescription = "Butterfly Animation",
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Calm Pause",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            // Replay Butterfly Animation Button
+                            FilledTonalButton(
+                                onClick = onReplayButterfly,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = if (colors.isDark) colors.surface.copy(alpha = 0.88f) else Color.White.copy(alpha = 0.85f),
+                                    contentColor = colors.lavenderPrimary
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                modifier = Modifier.testTag("replay_butterfly_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FilterVintage,
+                                    contentDescription = "Butterfly Animation",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Calm Pause",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+
+                            // Theme Toggle Button
+                            FilledTonalButton(
+                                onClick = onToggleTheme,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = if (colors.isDark) colors.surface.copy(alpha = 0.88f) else Color.White.copy(alpha = 0.85f),
+                                    contentColor = colors.lavenderPrimary
+                                ),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                modifier = Modifier.testTag("theme_toggle_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (colors.isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                    contentDescription = if (colors.isDark) "Switch to Light Theme" else "Switch to Dark Theme",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (colors.isDark) "Light" else "Dark",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
 
                         // Profile Avatar
@@ -227,8 +266,8 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(PastelLavenderLight)
-                                .border(1.5.dp, PastelLavenderPrimary, CircleShape)
+                                .background(colors.lavenderLight)
+                                .border(1.5.dp, colors.lavenderPrimary, CircleShape)
                                 .clickable { onNavigate(AppScreen.PORTFOLIO) },
                             contentAlignment = Alignment.Center
                         ) {
@@ -236,7 +275,7 @@ fun DashboardScreen(
                                 text = profile.name.take(1),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             )
                         }
                     }
@@ -248,7 +287,7 @@ fun DashboardScreen(
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontFamily = QuicksandFontFamily,
                                 fontWeight = FontWeight.Medium,
-                                color = PastelTextSecondary
+                                color = colors.textSecondary
                             )
                         )
                         Text(
@@ -257,7 +296,7 @@ fun DashboardScreen(
                                 fontFamily = PlayfairFontFamily,
                                 fontStyle = FontStyle.Italic,
                                 fontSize = 32.sp,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             )
                         )
 
@@ -268,7 +307,7 @@ fun DashboardScreen(
                             text = "Created by deekshitha for my personal student portfolio app",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 11.5.sp,
-                                color = PastelTextMuted
+                                color = colors.textMuted
                             )
                         )
                     }
@@ -289,11 +328,11 @@ fun DashboardScreen(
                     label = "Attendance",
                     value = "%.1f%%".format(overallAttendancePct),
                     subtext = if (overallAttendancePct >= 75f) "Safe (>75%)" else "Warning",
-                    color = if (overallAttendancePct >= 75f) PastelSageMint else PastelBlushPink,
-                    bgColor = if (overallAttendancePct >= 75f) PastelMintContainer else PastelPinkContainer,
+                    color = if (overallAttendancePct >= 75f) colors.mintPrimary else colors.pinkPrimary,
+                    bgColor = if (overallAttendancePct >= 75f) colors.mintContainer else colors.pinkContainer,
                     modifier = Modifier.weight(1f)
                 ) {
-                    onNavigate(AppScreen.ACADEMICS)
+                    onNavigateWithTab(AppScreen.ACADEMICS, 0)
                 }
 
                 // CGPA Quick Card
@@ -301,11 +340,11 @@ fun DashboardScreen(
                     label = "CGPA",
                     value = "%.2f".format(profile.cgpa),
                     subtext = "Target ${profile.targetCgpa}",
-                    color = PastelLavenderPrimary,
-                    bgColor = PastelLavenderContainer,
+                    color = colors.lavenderPrimary,
+                    bgColor = colors.lavenderContainer,
                     modifier = Modifier.weight(1f)
                 ) {
-                    onNavigate(AppScreen.ACADEMICS)
+                    onNavigateWithTab(AppScreen.ACADEMICS, 1)
                 }
 
                 // Pending Tasks Quick Card
@@ -313,11 +352,11 @@ fun DashboardScreen(
                     label = "Tasks",
                     value = "$pendingTasksCount due",
                     subtext = "Today's list",
-                    color = PastelPeach,
-                    bgColor = PastelPeachContainer,
+                    color = colors.peachPrimary,
+                    bgColor = colors.peachContainer,
                     modifier = Modifier.weight(1f)
                 ) {
-                    onNavigate(AppScreen.SCHEDULE)
+                    onNavigateWithTab(AppScreen.SCHEDULE, 0)
                 }
 
                 // Next Exam Quick Card
@@ -325,11 +364,11 @@ fun DashboardScreen(
                     label = "Exam",
                     value = "${nearestExam?.daysRemaining ?: 0}d left",
                     subtext = nearestExam?.subjectCode ?: "Mid-2",
-                    color = PastelSkyBlue,
-                    bgColor = PastelSkyContainer,
+                    color = colors.skyPrimary,
+                    bgColor = colors.skyContainer,
                     modifier = Modifier.weight(1f)
                 ) {
-                    onNavigate(AppScreen.SCHEDULE)
+                    onNavigateWithTab(AppScreen.SCHEDULE, 1)
                 }
             }
         }
@@ -343,8 +382,8 @@ fun DashboardScreen(
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                         .testTag("motivational_alert_card"),
                     shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = PastelLavenderContainer),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, PastelLavenderLight)
+                    colors = CardDefaults.cardColors(containerColor = colors.lavenderContainer),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
                 ) {
                     Row(
                         modifier = Modifier
@@ -356,13 +395,13 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(Color.White),
+                                .background(colors.surface),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = "Motivational spark",
-                                tint = PastelBlushPink,
+                                tint = colors.pinkPrimary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -378,13 +417,13 @@ fun DashboardScreen(
                                 Text(
                                     text = alert.context,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = PastelLavenderDark,
+                                    color = colors.lavenderOnContainer,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = "Tap to refresh ↻",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = PastelTextMuted,
+                                    color = colors.textMuted,
                                     modifier = Modifier.clickable {
                                         currentMotivationIndex++
                                     }
@@ -394,7 +433,7 @@ fun DashboardScreen(
                             Text(
                                 text = "“${alert.quote}”",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PastelTextPrimary,
+                                color = colors.textPrimary,
                                 fontStyle = FontStyle.Italic
                             )
                         }
@@ -414,12 +453,12 @@ fun DashboardScreen(
                     text = "All Options Dashboard",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
                     text = "Seamless one-tap navigation to every student tool",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
             }
         }
@@ -441,7 +480,7 @@ fun DashboardScreen(
                             DashboardOptionCard(
                                 item = option,
                                 modifier = Modifier.weight(1f),
-                                onClick = { onNavigate(option.targetScreen) }
+                                onClick = { onNavigateWithTab(option.targetScreen, option.targetSubTab) }
                             )
                         }
                         if (rowItems.size == 1) {
@@ -459,9 +498,9 @@ fun DashboardScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -478,13 +517,13 @@ fun DashboardScreen(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(PastelLavenderLight),
+                                    .background(colors.lavenderLight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Schedule,
                                     contentDescription = "Schedule",
-                                    tint = PastelLavenderPrimary,
+                                    tint = colors.lavenderPrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -494,12 +533,12 @@ fun DashboardScreen(
                                     text = "Today's Schedule Glance",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = PastelTextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "Monday • ${todaySchedule.size} lectures & labs",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PastelTextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                         }
@@ -523,13 +562,13 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                color = if (slot.isLab) PastelMintContainer else PastelLavenderContainer,
+                                color = if (slot.isLab) colors.mintContainer else colors.lavenderContainer,
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Text(
                                     text = slot.timeSlot.split(" - ").first(),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if (slot.isLab) PastelMintOnContainer else PastelLavenderOnContainer,
+                                    color = if (slot.isLab) colors.mintOnContainer else colors.lavenderOnContainer,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
@@ -542,24 +581,24 @@ fun DashboardScreen(
                                     text = slot.subjectName,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = PastelTextPrimary
+                                    color = colors.textPrimary
                                 )
                                 Text(
                                     text = "${slot.roomNo} • ${slot.faculty}",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PastelTextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
 
                             if (slot.isLab) {
                                 Surface(
-                                    color = PastelMintContainer,
+                                    color = colors.mintContainer,
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
                                         text = "LAB",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = PastelMintOnContainer,
+                                        color = colors.mintOnContainer,
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
@@ -567,7 +606,7 @@ fun DashboardScreen(
                             }
                         }
                         if (slot != todaySchedule.take(3).last()) {
-                            HorizontalDivider(color = PastelSurfaceOutline.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 2.dp))
+                            HorizontalDivider(color = colors.outline.copy(alpha = 0.5f), modifier = Modifier.padding(vertical = 2.dp))
                         }
                     }
                 }
@@ -581,9 +620,9 @@ fun DashboardScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -600,13 +639,13 @@ fun DashboardScreen(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(PastelPinkContainer),
+                                    .background(colors.pinkContainer),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.TaskAlt,
                                     contentDescription = "Tasks",
-                                    tint = PastelBlushPink,
+                                    tint = colors.pinkPrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -615,7 +654,7 @@ fun DashboardScreen(
                                 text = "Daily Work & Deadlines",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = colors.textPrimary
                             )
                         }
 
@@ -641,8 +680,8 @@ fun DashboardScreen(
                                 checked = task.isCompleted,
                                 onCheckedChange = { onToggleTask(task.id) },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = PastelLavenderPrimary,
-                                    uncheckedColor = PastelSurfaceOutline
+                                    checkedColor = colors.lavenderPrimary,
+                                    uncheckedColor = colors.outline
                                 )
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -650,14 +689,14 @@ fun DashboardScreen(
                                 Text(
                                     text = task.title,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = if (task.isCompleted) PastelTextMuted else PastelTextPrimary,
+                                    color = if (task.isCompleted) colors.textMuted else colors.textPrimary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "${task.category} • ${task.dueDate}",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PastelTextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                         }
@@ -674,15 +713,16 @@ fun DashboardOptionCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     Card(
         modifier = modifier
             .height(115.dp)
             .clickable(onClick = onClick)
             .testTag("dashboard_opt_${item.title.replace(" ", "_").lowercase()}"),
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -731,14 +771,14 @@ fun DashboardOptionCard(
                     text = item.title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary,
+                    color = colors.textPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = PastelTextSecondary,
+                    color = colors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 11.sp
@@ -758,6 +798,7 @@ fun PulseMetricCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     Card(
         modifier = modifier
             .clickable(onClick = onClick)
@@ -776,7 +817,7 @@ fun PulseMetricCard(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = PastelTextSecondary,
+                color = colors.textSecondary,
                 fontSize = 10.5.sp
             )
             Spacer(modifier = Modifier.height(2.dp))
@@ -790,7 +831,7 @@ fun PulseMetricCard(
             Text(
                 text = subtext,
                 style = MaterialTheme.typography.labelSmall,
-                color = PastelTextSecondary,
+                color = colors.textSecondary,
                 fontSize = 9.5.sp,
                 maxLines = 1
             )

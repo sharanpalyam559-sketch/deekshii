@@ -38,6 +38,7 @@ fun AcademicsScreen(
     onUpdateMarks: (String, Double, Double, Double, Double) -> Unit,
     onAddSubject: (String, String, String, Int, Int, Int) -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     var showAddSubjectDialog by remember { mutableStateOf(false) }
     var editingSubject by remember { mutableStateOf<SubjectRecord?>(null) }
 
@@ -53,14 +54,14 @@ fun AcademicsScreen(
                     onClick = { showAddSubjectDialog = true },
                     icon = { Icon(Icons.Default.Add, contentDescription = "Add Subject") },
                     text = { Text("Add Subject") },
-                    containerColor = PastelLavenderPrimary,
-                    contentColor = Color.White,
+                    containerColor = colors.lavenderPrimary,
+                    contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White,
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.testTag("add_subject_fab")
                 )
             }
         },
-        containerColor = PastelBackground
+        containerColor = colors.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -80,13 +81,13 @@ fun AcademicsScreen(
                     Text(
                         text = "Academics & Analytics",
                         style = MaterialTheme.typography.displaySmall,
-                        color = PastelLavenderPrimary,
+                        color = colors.lavenderPrimary,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Attendance cutoff tracker, marks progression & semester trends",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -107,11 +108,11 @@ fun AcademicsScreen(
                 PrimaryTabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = Color.Transparent,
-                    contentColor = PastelLavenderPrimary,
+                    contentColor = colors.lavenderPrimary,
                     indicator = {
                         TabRowDefaults.PrimaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(selectedTab),
-                            color = PastelLavenderPrimary,
+                            color = colors.lavenderPrimary,
                             height = 3.dp
                         )
                     },
@@ -124,7 +125,8 @@ fun AcademicsScreen(
                             Text(
                                 "Subjects & Attendance (${subjects.size})",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selectedTab == 0) colors.lavenderPrimary else colors.textMuted
                             )
                         }
                     )
@@ -135,7 +137,8 @@ fun AcademicsScreen(
                             Text(
                                 "Diagrams & Academic Trends",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selectedTab == 1) colors.lavenderPrimary else colors.textMuted
                             )
                         }
                     )
@@ -153,7 +156,7 @@ fun AcademicsScreen(
                             .padding(horizontal = 16.dp, vertical = 4.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (overallPct >= 75f) PastelMintContainer else PastelPinkContainer
+                            containerColor = if (overallPct >= 75f) colors.mintContainer else colors.pinkContainer
                         )
                     ) {
                         Row(
@@ -168,12 +171,12 @@ fun AcademicsScreen(
                                     text = "Overall Semester Attendance",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (overallPct >= 75f) PastelMintOnContainer else PastelPinkOnContainer
+                                    color = if (overallPct >= 75f) colors.mintOnContainer else colors.pinkOnContainer
                                 )
                                 Text(
                                     text = "$totalAttended attended of $totalConducted total classes",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PastelTextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
 
@@ -181,7 +184,7 @@ fun AcademicsScreen(
                                 text = "%.1f%%".format(overallPct),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (overallPct >= 75f) PastelSageMint else PastelBlushPink
+                                color = if (overallPct >= 75f) colors.mintPrimary else colors.pinkPrimary
                             )
                         }
                     }
@@ -235,7 +238,7 @@ fun AcademicsScreen(
 
         AlertDialog(
             onDismissRequest = { showAddSubjectDialog = false },
-            title = { Text("Add Subject & Attendance Record", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
+            title = { Text("Add Subject & Attendance Record", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colors.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
@@ -294,7 +297,7 @@ fun AcademicsScreen(
                             showAddSubjectDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.lavenderPrimary)
                 ) {
                     Text("Add Subject")
                 }
@@ -321,7 +324,8 @@ fun AcademicsScreen(
                 Text(
                     text = "Update Marks: ${sub.name}",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
                 )
             },
             text = {
@@ -368,7 +372,7 @@ fun AcademicsScreen(
                         )
                         editingSubject = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.lavenderPrimary)
                 ) {
                     Text("Save Marks")
                 }
@@ -390,15 +394,17 @@ fun SubjectDetailCard(
     onMarkAbsent: () -> Unit,
     onEditMarks: () -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .testTag("subject_card_${subject.code.lowercase()}"),
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -414,14 +420,14 @@ fun SubjectDetailCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
-                            color = PastelLavenderContainer,
+                            color = colors.lavenderContainer,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
                                 text = subject.code,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelLavenderPrimary,
+                                color = colors.lavenderPrimary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -429,7 +435,7 @@ fun SubjectDetailCard(
                         Text(
                             text = "${subject.credits} Credits",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextMuted
+                            color = colors.textMuted
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
@@ -437,12 +443,12 @@ fun SubjectDetailCard(
                         text = subject.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary
+                        color = colors.textPrimary
                     )
                     Text(
                         text = subject.faculty,
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
 
@@ -454,12 +460,12 @@ fun SubjectDetailCard(
                         text = "%.1f%%".format(subject.attendancePercentage),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = if (subject.isSafeAttendance) PastelSageMint else PastelBlushPink
+                        color = if (subject.isSafeAttendance) colors.mintPrimary else colors.pinkPrimary
                     )
                     Text(
                         text = "${subject.attendedClasses}/${subject.totalClasses} classes",
                         style = MaterialTheme.typography.labelSmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -468,14 +474,14 @@ fun SubjectDetailCard(
 
             // Bunk Calculator / Safe status Banner
             Surface(
-                color = if (subject.isSafeAttendance) PastelMintContainer else PastelPinkContainer,
+                color = if (subject.isSafeAttendance) colors.mintContainer else colors.pinkContainer,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = subject.bunkStatusText,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (subject.isSafeAttendance) PastelMintOnContainer else PastelPinkOnContainer,
+                    color = if (subject.isSafeAttendance) colors.mintOnContainer else colors.pinkOnContainer,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
@@ -487,7 +493,7 @@ fun SubjectDetailCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PastelBackground, RoundedCornerShape(14.dp))
+                    .background(colors.background, RoundedCornerShape(14.dp))
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
@@ -511,8 +517,8 @@ fun SubjectDetailCard(
                         onClick = onMarkPresent,
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = PastelMintContainer,
-                            contentColor = PastelMintOnContainer
+                            containerColor = colors.mintContainer,
+                            contentColor = colors.mintOnContainer
                         ),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -525,8 +531,8 @@ fun SubjectDetailCard(
                         onClick = onMarkAbsent,
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = PastelPinkContainer,
-                            contentColor = PastelPinkOnContainer
+                            containerColor = colors.pinkContainer,
+                            contentColor = colors.pinkOnContainer
                         ),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
@@ -538,7 +544,7 @@ fun SubjectDetailCard(
 
                 TextButton(
                     onClick = onEditMarks,
-                    colors = ButtonDefaults.textButtonColors(contentColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.textButtonColors(contentColor = colors.lavenderPrimary)
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
@@ -551,20 +557,23 @@ fun SubjectDetailCard(
 
 @Composable
 fun MarksChip(label: String, score: String) {
+    val colors = DeekshiiTheme.colors
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = PastelTextMuted, fontSize = 10.sp)
-        Text(text = score, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = PastelTextPrimary)
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = colors.textMuted, fontSize = 10.sp)
+        Text(text = score, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = colors.textPrimary)
     }
 }
 
 @Composable
 fun SubjectMarksSummaryCard(subjects: List<SubjectRecord>) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -575,12 +584,12 @@ fun SubjectMarksSummaryCard(subjects: List<SubjectRecord>) {
                 text = "Subject Performance Matrix",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = PastelTextPrimary
+                color = colors.textPrimary
             )
             Text(
                 text = "Detailed score card across all Semester VI courses",
                 style = MaterialTheme.typography.bodySmall,
-                color = PastelTextSecondary
+                color = colors.textSecondary
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -598,30 +607,30 @@ fun SubjectMarksSummaryCard(subjects: List<SubjectRecord>) {
                             text = sub.name,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
-                            color = PastelTextPrimary
+                            color = colors.textPrimary
                         )
                         Text(
                             text = "${sub.code} • ${sub.credits} Credits • Internal: ${sub.internalMarks.toInt()}/40",
                             style = MaterialTheme.typography.bodySmall,
-                            color = PastelTextSecondary
+                            color = colors.textSecondary
                         )
                     }
 
                     Surface(
-                        color = if (sub.mid2Marks >= 27) PastelMintContainer else PastelSkyContainer,
+                        color = if (sub.mid2Marks >= 27) colors.mintContainer else colors.skyContainer,
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = if (sub.mid2Marks >= 27) "Grade: A+" else "Grade: A",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = if (sub.mid2Marks >= 27) PastelMintOnContainer else PastelSkyOnContainer,
+                            color = if (sub.mid2Marks >= 27) colors.mintOnContainer else colors.skyOnContainer,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                 }
                 if (sub != subjects.last()) {
-                    HorizontalDivider(color = PastelSurfaceOutline.copy(alpha = 0.5f))
+                    HorizontalDivider(color = colors.outline.copy(alpha = 0.5f))
                 }
             }
         }

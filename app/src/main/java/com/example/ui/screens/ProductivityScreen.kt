@@ -42,6 +42,8 @@ fun ProductivityScreen(
     motivationalAlerts: List<MotivationalAlert>,
     productivityTips: List<ProductivityTip>
 ) {
+    val colors = DeekshiiTheme.colors
+
     val progress = if (pomodoroTotalSeconds > 0) {
         (pomodoroTotalSeconds - pomodoroSecondsRemaining).toFloat() / pomodoroTotalSeconds.toFloat()
     } else 0f
@@ -59,7 +61,7 @@ fun ProductivityScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(PastelBackground)
+            .background(colors.background)
             .testTag("productivity_screen"),
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
@@ -74,13 +76,13 @@ fun ProductivityScreen(
                 Text(
                     text = "Productivity & Calm Hub",
                     style = MaterialTheme.typography.displaySmall,
-                    color = PastelLavenderPrimary,
+                    color = colors.lavenderPrimary,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Mindful focus timer, motivational alerts & academic balance tips",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
             }
         }
@@ -93,9 +95,9 @@ fun ProductivityScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .testTag("pomodoro_card"),
                 shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -113,23 +115,23 @@ fun ProductivityScreen(
                                 text = "Calm Focus Timer",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = colors.textPrimary
                             )
                             Text(
                                 text = "Deep focus without academic overwhelm",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PastelTextSecondary
+                                color = colors.textSecondary
                             )
                         }
 
                         Surface(
-                            color = PastelLavenderContainer,
+                            color = colors.lavenderContainer,
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
                                 text = "★ $sessionsCompleted Sessions",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = PastelLavenderPrimary,
+                                color = colors.lavenderPrimary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
@@ -150,7 +152,7 @@ fun ProductivityScreen(
 
                             // Background Track
                             drawCircle(
-                                color = PastelLavenderLight,
+                                color = colors.lavenderLight,
                                 radius = radius,
                                 center = center,
                                 style = Stroke(width = strokeWidth)
@@ -160,7 +162,7 @@ fun ProductivityScreen(
                             val sweepAngle = animatedProgress * 360f
                             drawArc(
                                 brush = Brush.sweepGradient(
-                                    listOf(PastelLavenderPrimary, PastelBlushPink, PastelSageMint, PastelLavenderPrimary)
+                                    listOf(colors.lavenderPrimary, colors.pinkPrimary, colors.mintPrimary, colors.lavenderPrimary)
                                 ),
                                 startAngle = -90f,
                                 sweepAngle = sweepAngle,
@@ -176,12 +178,12 @@ fun ProductivityScreen(
                                 text = formattedTime,
                                 style = MaterialTheme.typography.displayMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             )
                             Text(
                                 text = if (isPomodoroRunning) "Mindful Study 🌸" else "Ready to Focus",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = PastelTextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
@@ -196,17 +198,17 @@ fun ProductivityScreen(
                         FilledTonalButton(
                             onClick = { onResetPomodoro(pomodoroTotalSeconds / 60) },
                             shape = CircleShape,
-                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = PastelLavenderLight)
+                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = colors.lavenderLight)
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Reset Timer", tint = PastelLavenderPrimary)
+                            Icon(Icons.Default.Refresh, contentDescription = "Reset Timer", tint = colors.lavenderPrimary)
                         }
 
                         Button(
                             onClick = onTogglePomodoro,
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isPomodoroRunning) PastelBlushPink else PastelLavenderPrimary,
-                                contentColor = Color.White
+                                containerColor = if (isPomodoroRunning) colors.pinkPrimary else colors.lavenderPrimary,
+                                contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White
                             ),
                             modifier = Modifier
                                 .height(50.dp)
@@ -263,12 +265,12 @@ fun ProductivityScreen(
                     text = "Personalized Motivational Alerts",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
                     text = "Affirmations crafted for women in engineering & academic resilience",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
             }
         }
@@ -279,9 +281,9 @@ fun ProductivityScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Row(
                     modifier = Modifier
@@ -293,13 +295,13 @@ fun ProductivityScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(PastelPinkContainer),
+                            .background(colors.pinkContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Spa,
                             contentDescription = null,
-                            tint = PastelBlushPink,
+                            tint = colors.pinkPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -315,17 +317,17 @@ fun ProductivityScreen(
                                 text = alert.context,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             )
                             Surface(
-                                color = PastelLavenderContainer,
+                                color = colors.lavenderContainer,
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
                                     text = alert.category,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontSize = 9.sp,
-                                    color = PastelLavenderOnContainer,
+                                    color = colors.lavenderOnContainer,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
                             }
@@ -337,7 +339,7 @@ fun ProductivityScreen(
                             text = "“${alert.quote}”",
                             style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic,
-                            color = PastelTextPrimary,
+                            color = colors.textPrimary,
                             lineHeight = 20.sp
                         )
 
@@ -346,7 +348,7 @@ fun ProductivityScreen(
                         Text(
                             text = "— ${alert.author}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextMuted
+                            color = colors.textMuted
                         )
                     }
                 }
@@ -364,12 +366,12 @@ fun ProductivityScreen(
                     text = "B.Tech Engineering Productivity Strategies",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
                     text = "High-impact study techniques tested for tech courses",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
             }
         }
@@ -380,8 +382,8 @@ fun ProductivityScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -398,13 +400,13 @@ fun ProductivityScreen(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(PastelMintContainer),
+                                    .background(colors.mintContainer),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Lightbulb,
                                     contentDescription = null,
-                                    tint = PastelSageMint,
+                                    tint = colors.mintPrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -413,18 +415,18 @@ fun ProductivityScreen(
                                 text = tip.title,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = colors.textPrimary
                             )
                         }
 
                         Surface(
-                            color = PastelMintContainer,
+                            color = colors.mintContainer,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
                                 text = tip.category,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = PastelMintOnContainer,
+                                color = colors.mintOnContainer,
                                 fontSize = 10.sp,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
@@ -436,7 +438,7 @@ fun ProductivityScreen(
                     Text(
                         text = tip.tip,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelTextSecondary,
+                        color = colors.textSecondary,
                         lineHeight = 20.sp
                     )
                 }

@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -112,17 +114,27 @@ fun ButterflyOpeningScreen(
         )
     }
 
+    val colors = DeekshiiTheme.colors
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFFFF6F9), // Soft blush cloud
-                        Color(0xFFF5EEFA), // Gentle lavender mist
-                        Color(0xFFEFF7F3), // Pale mint dawn
-                        Color(0xFFFAF7FD)  // Soothing pearl
-                    )
+                    colors = if (colors.isDark) {
+                        listOf(
+                            Color(0xFF221A33),
+                            Color(0xFF191326),
+                            Color(0xFF130E1D)
+                        )
+                    } else {
+                        listOf(
+                            Color(0xFFFFF6F9),
+                            Color(0xFFF5EEFA),
+                            Color(0xFFEFF7F3),
+                            Color(0xFFFAF7FD)
+                        )
+                    }
                 )
             )
             .testTag("butterfly_opening_screen")
@@ -135,7 +147,11 @@ fun ButterflyOpeningScreen(
             // Gentle background radial pastel glow
             drawCircle(
                 brush = Brush.radialGradient(
-                    colors = listOf(Color(0x35E1BEE7), Color(0x15F8BBD0), Color.Transparent),
+                    colors = listOf(
+                        colors.lavenderPrimary.copy(alpha = 0.25f),
+                        colors.pinkPrimary.copy(alpha = 0.12f),
+                        Color.Transparent
+                    ),
                     center = Offset(width * 0.5f, height * 0.45f),
                     radius = (width * 0.65f) * auraScale
                 ),
@@ -149,11 +165,13 @@ fun ButterflyOpeningScreen(
                 val sparkY = ((height * 0.85f - (floatTime * 40f + i * 55f) % (height * 0.75f))).toFloat()
                 val sparkAlpha = ((sin(floatTime * 2f + i) + 1f) / 2f) * 0.6f
                 drawCircle(
-                    color = if (i % 2 == 0) Color(0xFF917BBF).copy(alpha = sparkAlpha) else Color(0xFFF398AE).copy(alpha = sparkAlpha),
+                    color = if (i % 2 == 0) colors.lavenderPrimary.copy(alpha = sparkAlpha) else colors.pinkPrimary.copy(alpha = sparkAlpha),
                     radius = if (i % 3 == 0) 3.5f else 2f,
                     center = Offset(sparkX, sparkY)
                 )
             }
+
+            val butterflyBodyColor = if (colors.isDark) Color(0xFFE2D6F5) else Color(0xFF382F45)
 
             // Draw each fluttering butterfly
             butterflies.forEach { b ->
@@ -162,9 +180,8 @@ fun ButterflyOpeningScreen(
                 val yProgress = (b.initialY * height - (time * 28f * (b.speedY + 0.05f))) % height
                 val currentY = if (yProgress < -50f) height + 50f else yProgress
                 val currentX = (b.initialX * width) + sin(time * b.swaySpeed * 0.3f) * b.swayAmplitude
-                val flightAngle = cos(time * b.swaySpeed * 0.3f) * 18f - 15f // slight tilt in flight direction
+                val flightAngle = cos(time * b.swaySpeed * 0.3f) * 18f - 15f
 
-                // Wing span compressed/expanded by sinusoidal flap
                 val wingScale = (sin((time * 8f) + b.phaseOffset * 3f)).coerceIn(-1f, 1f)
 
                 drawButterfly(
@@ -173,7 +190,8 @@ fun ButterflyOpeningScreen(
                     wingScale = wingScale,
                     rotationDegrees = flightAngle,
                     wingColorTop = b.wingColor,
-                    wingColorBottom = b.wingColor2
+                    wingColorBottom = b.wingColor2,
+                    bodyColor = butterflyBodyColor
                 )
             }
         }
@@ -182,17 +200,18 @@ fun ButterflyOpeningScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp, vertical = 40.dp)
+                .padding(horizontal = 24.dp, vertical = 28.dp)
                 .navigationBarsPadding()
-                .statusBarsPadding(),
+                .statusBarsPadding()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top serene badge
             Surface(
-                color = PastelLavenderLight.copy(alpha = 0.75f),
+                color = colors.lavenderContainer.copy(alpha = 0.85f),
                 shape = RoundedCornerShape(24.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelLavenderPrimary.copy(alpha = 0.3f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.lavenderPrimary.copy(alpha = 0.35f)),
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 Row(
@@ -203,14 +222,14 @@ fun ButterflyOpeningScreen(
                     Icon(
                         imageVector = Icons.Default.AutoAwesome,
                         contentDescription = "Calm sparkles",
-                        tint = PastelLavenderPrimary,
+                        tint = colors.lavenderPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Calm Academic Sanctuary",
                         style = MaterialTheme.typography.labelMedium,
-                        color = PastelLavenderOnContainer,
+                        color = colors.lavenderOnContainer,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -227,10 +246,10 @@ fun ButterflyOpeningScreen(
                         .padding(horizontal = 8.dp),
                     shape = RoundedCornerShape(32.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.88f)
+                        containerColor = colors.surface.copy(alpha = if (colors.isDark) 0.95f else 0.88f)
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEADDF5))
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
                 ) {
                     Column(
                         modifier = Modifier
@@ -241,7 +260,7 @@ fun ButterflyOpeningScreen(
                         Text(
                             text = "Welcome to",
                             style = MaterialTheme.typography.titleMedium,
-                            color = PastelTextSecondary,
+                            color = colors.textSecondary,
                             letterSpacing = 1.2.sp
                         )
 
@@ -253,7 +272,7 @@ fun ButterflyOpeningScreen(
                                 fontFamily = PlayfairFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 42.sp,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             ),
                             textAlign = TextAlign.Center
                         )
@@ -267,7 +286,7 @@ fun ButterflyOpeningScreen(
                                 fontFamily = PlayfairFontFamily,
                                 fontStyle = FontStyle.Italic,
                                 fontSize = 26.sp,
-                                color = PastelBlushPink
+                                color = colors.pinkPrimary
                             ),
                             textAlign = TextAlign.Center
                         )
@@ -280,7 +299,7 @@ fun ButterflyOpeningScreen(
                                 .width(60.dp)
                                 .height(2.dp)
                                 .clip(RoundedCornerShape(1.dp))
-                                .background(PastelSurfaceOutline)
+                                .background(colors.outline)
                         )
 
                         Spacer(modifier = Modifier.height(14.dp))
@@ -291,7 +310,7 @@ fun ButterflyOpeningScreen(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = 12.5.sp,
                                 lineHeight = 18.sp,
-                                color = PastelTextMuted
+                                color = colors.textMuted
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 8.dp)
@@ -300,13 +319,13 @@ fun ButterflyOpeningScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Surface(
-                            color = PastelPinkContainer.copy(alpha = 0.6f),
+                            color = colors.pinkContainer.copy(alpha = 0.6f),
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Text(
                                 text = "B.Tech CSE • Semester VI • Study & Schedule Hub",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = PastelPinkOnContainer,
+                                color = colors.pinkOnContainer,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -319,8 +338,8 @@ fun ButterflyOpeningScreen(
                 onClick = onTransitionComplete,
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PastelLavenderPrimary,
-                    contentColor = Color.White
+                    containerColor = colors.lavenderPrimary,
+                    contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
                 modifier = Modifier
@@ -351,7 +370,8 @@ private fun DrawScope.drawButterfly(
     wingScale: Float,
     rotationDegrees: Float,
     wingColorTop: Color,
-    wingColorBottom: Color
+    wingColorBottom: Color,
+    bodyColor: Color
 ) {
     rotate(degrees = rotationDegrees, pivot = center) {
         val wingSpan = (size * 0.9f) * wingScale.coerceIn(-1f, 1f)
@@ -419,7 +439,7 @@ private fun DrawScope.drawButterfly(
 
         // Butterfly Body & Antennae
         drawLine(
-            color = PastelTextPrimary.copy(alpha = 0.6f),
+            color = bodyColor.copy(alpha = 0.7f),
             start = Offset(center.x, center.y - size * 0.4f),
             end = Offset(center.x, center.y + size * 0.4f),
             strokeWidth = 2.5f
@@ -427,13 +447,13 @@ private fun DrawScope.drawButterfly(
 
         // Antennae
         drawLine(
-            color = PastelTextPrimary.copy(alpha = 0.45f),
+            color = bodyColor.copy(alpha = 0.5f),
             start = Offset(center.x, center.y - size * 0.35f),
             end = Offset(center.x + size * 0.25f, center.y - size * 0.6f),
             strokeWidth = 1.2f
         )
         drawLine(
-            color = PastelTextPrimary.copy(alpha = 0.45f),
+            color = bodyColor.copy(alpha = 0.5f),
             start = Offset(center.x, center.y - size * 0.35f),
             end = Offset(center.x - size * 0.25f, center.y - size * 0.6f),
             strokeWidth = 1.2f

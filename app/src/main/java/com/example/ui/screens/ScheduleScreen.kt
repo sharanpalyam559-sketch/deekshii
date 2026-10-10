@@ -33,6 +33,8 @@ fun ScheduleScreen(
     scheduleList: List<ScheduleItem>,
     selectedDay: String,
     onSelectDay: (String) -> Unit,
+    activeSubTab: Int = 0,
+    onSubTabChange: (Int) -> Unit = {},
     dailyTasks: List<DailyTask>,
     onToggleTask: (String) -> Unit,
     onAddTask: (String, String, String, String) -> Unit,
@@ -40,7 +42,7 @@ fun ScheduleScreen(
     examDeadlines: List<ExamDeadline>,
     onAddExam: (String, String, String, Int, String) -> Unit
 ) {
-    var activeSubTab by remember { mutableIntStateOf(0) } // 0: Daily Timetable & Tasks, 1: Exam Deadlines
+    val colors = DeekshiiTheme.colors
     var showAddTaskDialog by remember { mutableStateOf(false) }
     var showAddExamDialog by remember { mutableStateOf(false) }
 
@@ -57,13 +59,13 @@ fun ScheduleScreen(
                 },
                 icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
                 text = { Text(if (activeSubTab == 0) "New Task" else "Add Exam") },
-                containerColor = PastelLavenderPrimary,
-                contentColor = Color.White,
+                containerColor = colors.lavenderPrimary,
+                contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.testTag("schedule_fab")
             )
         },
-        containerColor = PastelBackground
+        containerColor = colors.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -83,13 +85,13 @@ fun ScheduleScreen(
                     Text(
                         text = "Schedule & Deadlines",
                         style = MaterialTheme.typography.displaySmall,
-                        color = PastelLavenderPrimary,
+                        color = colors.lavenderPrimary,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Keep your B.Tech classes, tasks & exam countdown in harmony",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -99,11 +101,11 @@ fun ScheduleScreen(
                 PrimaryTabRow(
                     selectedTabIndex = activeSubTab,
                     containerColor = Color.Transparent,
-                    contentColor = PastelLavenderPrimary,
+                    contentColor = colors.lavenderPrimary,
                     indicator = {
                         TabRowDefaults.PrimaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(activeSubTab),
-                            color = PastelLavenderPrimary,
+                            color = colors.lavenderPrimary,
                             height = 3.dp
                         )
                     },
@@ -111,23 +113,25 @@ fun ScheduleScreen(
                 ) {
                     Tab(
                         selected = activeSubTab == 0,
-                        onClick = { activeSubTab = 0 },
+                        onClick = { onSubTabChange(0) },
                         text = {
                             Text(
                                 "Daily Work & Timetable",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (activeSubTab == 0) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (activeSubTab == 0) FontWeight.Bold else FontWeight.Normal,
+                                color = if (activeSubTab == 0) colors.lavenderPrimary else colors.textMuted
                             )
                         }
                     )
                     Tab(
                         selected = activeSubTab == 1,
-                        onClick = { activeSubTab = 1 },
+                        onClick = { onSubTabChange(1) },
                         text = {
                             Text(
                                 "Exam Deadlines (${examDeadlines.size})",
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (activeSubTab == 1) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (activeSubTab == 1) FontWeight.Bold else FontWeight.Normal,
+                                color = if (activeSubTab == 1) colors.lavenderPrimary else colors.textMuted
                             )
                         }
                     )
@@ -151,15 +155,15 @@ fun ScheduleScreen(
                                 label = { Text(day) },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = PastelLavenderPrimary,
-                                    selectedLabelColor = Color.White,
-                                    containerColor = PastelSurface,
-                                    labelColor = PastelTextSecondary
+                                    selectedContainerColor = colors.lavenderPrimary,
+                                    selectedLabelColor = if (colors.isDark) Color(0xFF1B1429) else Color.White,
+                                    containerColor = colors.surface,
+                                    labelColor = colors.textSecondary
                                 ),
                                 border = FilterChipDefaults.filterChipBorder(
                                     enabled = true,
                                     selected = isSelected,
-                                    borderColor = if (isSelected) PastelLavenderPrimary else PastelSurfaceOutline
+                                    borderColor = if (isSelected) colors.lavenderPrimary else colors.outline
                                 )
                             )
                         }
@@ -173,7 +177,7 @@ fun ScheduleScreen(
                         text = "$selectedDay Lectures & Labs",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary,
+                        color = colors.textPrimary,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
                     )
                 }
@@ -185,7 +189,8 @@ fun ScheduleScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = PastelSurface)
+                            colors = CardDefaults.cardColors(containerColor = colors.surface),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -193,10 +198,10 @@ fun ScheduleScreen(
                                     .padding(24.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Icon(Icons.Default.Weekend, contentDescription = null, tint = PastelSageMint, modifier = Modifier.size(36.dp))
+                                Icon(Icons.Default.Weekend, contentDescription = null, tint = colors.mintPrimary, modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("No scheduled lectures for $selectedDay", style = MaterialTheme.typography.bodyMedium, color = PastelTextSecondary)
-                                Text("Time for self-paced project work or relaxation 🌸", style = MaterialTheme.typography.bodySmall, color = PastelTextMuted)
+                                Text("No scheduled lectures for $selectedDay", style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+                                Text("Time for self-paced project work or relaxation 🌸", style = MaterialTheme.typography.bodySmall, color = colors.textMuted)
                             }
                         }
                     }
@@ -221,17 +226,17 @@ fun ScheduleScreen(
                                 text = "Tasks, Labs & Submissions",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = colors.textPrimary
                             )
                             Text(
                                 text = "${dailyTasks.count { !it.isCompleted }} pending • ${dailyTasks.count { it.isCompleted }} completed",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PastelTextSecondary
+                                color = colors.textSecondary
                             )
                         }
 
                         IconButton(onClick = { showAddTaskDialog = true }) {
-                            Icon(Icons.Default.AddCircle, contentDescription = "Add Task", tint = PastelLavenderPrimary)
+                            Icon(Icons.Default.AddCircle, contentDescription = "Add Task", tint = colors.lavenderPrimary)
                         }
                     }
                 }
@@ -252,8 +257,8 @@ fun ScheduleScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                         shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(containerColor = PastelPinkContainer),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, PastelPinkLight)
+                        colors = CardDefaults.cardColors(containerColor = colors.pinkContainer),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.pinkContainer)
                     ) {
                         Row(
                             modifier = Modifier
@@ -265,10 +270,10 @@ fun ScheduleScreen(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White),
+                                    .background(colors.surface),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.HourglassTop, contentDescription = null, tint = PastelBlushPink)
+                                Icon(Icons.Default.HourglassTop, contentDescription = null, tint = colors.pinkPrimary)
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
@@ -276,12 +281,12 @@ fun ScheduleScreen(
                                     text = "Semester Mid-2 & Final Vivas Approaching",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = PastelPinkOnContainer
+                                    color = colors.pinkOnContainer
                                 )
                                 Text(
                                     text = "Maintain syllabus pace and avoid eleventh-hour stress.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PastelTextSecondary
+                                    color = colors.textSecondary
                                 )
                             }
                         }
@@ -305,7 +310,7 @@ fun ScheduleScreen(
 
         AlertDialog(
             onDismissRequest = { showAddTaskDialog = false },
-            title = { Text("Add Academic Task", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
+            title = { Text("Add Academic Task", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colors.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
@@ -319,7 +324,7 @@ fun ScheduleScreen(
                     OutlinedTextField(
                         value = category,
                         onValueChange = { category = it },
-                        label = { Text("Category (Assignment, Lab Record, Mini Project, Revision)") },
+                        label = { Text("Category (Assignment, Lab Record, Revision)") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp)
                     )
@@ -340,7 +345,7 @@ fun ScheduleScreen(
                             showAddTaskDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.lavenderPrimary)
                 ) {
                     Text("Add Task")
                 }
@@ -364,7 +369,7 @@ fun ScheduleScreen(
 
         AlertDialog(
             onDismissRequest = { showAddExamDialog = false },
-            title = { Text("Add Exam Deadline", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) },
+            title = { Text("Add Exam Deadline", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = colors.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
@@ -406,7 +411,7 @@ fun ScheduleScreen(
                             showAddExamDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.lavenderPrimary)
                 ) {
                     Text("Save Exam")
                 }
@@ -423,14 +428,16 @@ fun ScheduleScreen(
 
 @Composable
 fun TimetableItemCard(item: ScheduleItem) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 5.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Row(
             modifier = Modifier
@@ -439,7 +446,7 @@ fun TimetableItemCard(item: ScheduleItem) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                color = if (item.isLab) PastelMintContainer else PastelLavenderContainer,
+                color = if (item.isLab) colors.mintContainer else colors.lavenderContainer,
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Column(
@@ -450,12 +457,12 @@ fun TimetableItemCard(item: ScheduleItem) {
                         text = item.timeSlot.split(" - ").first(),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (item.isLab) PastelMintOnContainer else PastelLavenderOnContainer
+                        color = if (item.isLab) colors.mintOnContainer else colors.lavenderOnContainer
                     )
                     Text(
                         text = if (item.isLab) "LAB" else "THEORY",
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (item.isLab) PastelSageMint else PastelLavenderPrimary,
+                        color = if (item.isLab) colors.mintPrimary else colors.lavenderPrimary,
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -469,17 +476,17 @@ fun TimetableItemCard(item: ScheduleItem) {
                     text = item.subjectName,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary
+                    color = colors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = PastelTextMuted, modifier = Modifier.size(13.dp))
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = colors.textMuted, modifier = Modifier.size(13.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = item.roomNo, style = MaterialTheme.typography.bodySmall, color = PastelTextSecondary)
+                    Text(text = item.roomNo, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     Spacer(modifier = Modifier.width(10.dp))
-                    Icon(Icons.Default.Person, contentDescription = null, tint = PastelTextMuted, modifier = Modifier.size(13.dp))
+                    Icon(Icons.Default.Person, contentDescription = null, tint = colors.textMuted, modifier = Modifier.size(13.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = item.faculty, style = MaterialTheme.typography.bodySmall, color = PastelTextSecondary)
+                    Text(text = item.faculty, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                 }
             }
         }
@@ -492,13 +499,15 @@ fun TaskItemCard(
     onToggle: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Row(
             modifier = Modifier
@@ -511,8 +520,8 @@ fun TaskItemCard(
                 checked = task.isCompleted,
                 onCheckedChange = { onToggle() },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = PastelLavenderPrimary,
-                    uncheckedColor = PastelSurfaceOutline
+                    checkedColor = colors.lavenderPrimary,
+                    uncheckedColor = colors.outline
                 )
             )
 
@@ -524,17 +533,17 @@ fun TaskItemCard(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     ),
-                    color = if (task.isCompleted) PastelTextMuted else PastelTextPrimary,
+                    color = if (task.isCompleted) colors.textMuted else colors.textPrimary,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         color = when (task.category) {
-                            "Assignment" -> PastelSkyContainer
-                            "Lab Record" -> PastelMintContainer
-                            "Mini Project" -> PastelPeachContainer
-                            else -> PastelLavenderContainer
+                            "Assignment" -> colors.skyContainer
+                            "Lab Record" -> colors.mintContainer
+                            "Mini Project" -> colors.peachContainer
+                            else -> colors.lavenderContainer
                         },
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -542,7 +551,7 @@ fun TaskItemCard(
                             text = task.category,
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp,
-                            color = PastelTextPrimary,
+                            color = colors.textPrimary,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -552,14 +561,14 @@ fun TaskItemCard(
                     Text(
                         text = "Due: ${task.dueDate}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary,
+                        color = colors.textSecondary,
                         fontSize = 11.sp
                     )
                 }
             }
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.DeleteOutline, contentDescription = "Delete Task", tint = PastelTextMuted, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.DeleteOutline, contentDescription = "Delete Task", tint = colors.textMuted, modifier = Modifier.size(18.dp))
             }
         }
     }
@@ -567,14 +576,16 @@ fun TaskItemCard(
 
 @Composable
 fun ExamDeadlineCard(exam: ExamDeadline) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -591,17 +602,17 @@ fun ExamDeadlineCard(exam: ExamDeadline) {
                         text = exam.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary
+                        color = colors.textPrimary
                     )
                     Text(
                         text = "${exam.subjectCode} • ${exam.examType} • ${exam.hallNumber}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
 
                 Surface(
-                    color = if (exam.daysRemaining <= 5) PastelPinkContainer else PastelLavenderContainer,
+                    color = if (exam.daysRemaining <= 5) colors.pinkContainer else colors.lavenderContainer,
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -612,12 +623,12 @@ fun ExamDeadlineCard(exam: ExamDeadline) {
                             text = "${exam.daysRemaining}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = if (exam.daysRemaining <= 5) Color(0xFFD81B60) else PastelLavenderPrimary
+                            color = if (exam.daysRemaining <= 5) colors.pinkPrimary else colors.lavenderPrimary
                         )
                         Text(
                             text = "days left",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextSecondary,
+                            color = colors.textSecondary,
                             fontSize = 10.sp
                         )
                     }
@@ -635,13 +646,13 @@ fun ExamDeadlineCard(exam: ExamDeadline) {
                 Text(
                     text = "Syllabus Revised: ${exam.syllabusProgress}%",
                     style = MaterialTheme.typography.labelSmall,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
                 Text(
                     text = exam.examDate,
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = PastelLavenderDark
+                    color = colors.lavenderPrimary
                 )
             }
 
@@ -652,8 +663,8 @@ fun ExamDeadlineCard(exam: ExamDeadline) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
-                color = if (exam.syllabusProgress >= 75) PastelSageMint else PastelPeach,
-                trackColor = PastelSurfaceVariant,
+                color = if (exam.syllabusProgress >= 75) colors.mintPrimary else colors.peachPrimary,
+                trackColor = colors.surfaceVariant,
                 strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
             )
         }

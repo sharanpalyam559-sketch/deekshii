@@ -29,14 +29,16 @@ import com.example.ui.theme.*
 @Composable
 fun PortfolioScreen(
     profile: StudentProfile,
+    onToggleTheme: () -> Unit = {},
     onUpdateProfile: (String, String, String, String, Double, Double, String) -> Unit
 ) {
+    val colors = DeekshiiTheme.colors
     var showEditDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(PastelBackground)
+            .background(colors.background)
             .testTag("portfolio_screen"),
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
@@ -51,13 +53,13 @@ fun PortfolioScreen(
                 Text(
                     text = "Student Portfolio & Profile",
                     style = MaterialTheme.typography.displaySmall,
-                    color = PastelLavenderPrimary,
+                    color = colors.lavenderPrimary,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Personal academic portfolio created by Deekshitha",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = PastelTextSecondary
+                    color = colors.textSecondary
                 )
             }
         }
@@ -69,9 +71,9 @@ fun PortfolioScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -83,8 +85,7 @@ fun PortfolioScreen(
                         modifier = Modifier
                             .size(76.dp)
                             .clip(CircleShape)
-                            .background(PastelLavenderLight)
-                            .border(2.dp, PastelLavenderPrimary, CircleShape),
+                            .background(colors.lavenderLight),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -92,7 +93,7 @@ fun PortfolioScreen(
                             style = MaterialTheme.typography.displaySmall.copy(
                                 fontFamily = PlayfairFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelLavenderPrimary
+                                color = colors.lavenderPrimary
                             )
                         )
                     }
@@ -105,21 +106,21 @@ fun PortfolioScreen(
                             fontFamily = PlayfairFontFamily,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = PastelTextPrimary
+                            color = colors.textPrimary
                         )
                     )
 
                     Text(
                         text = profile.title,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelLavenderPrimary,
+                        color = colors.lavenderPrimary,
                         fontWeight = FontWeight.SemiBold
                     )
 
                     Text(
                         text = "${profile.semester} • Roll: ${profile.rollNo}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -127,14 +128,14 @@ fun PortfolioScreen(
                     Text(
                         text = profile.college,
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextMuted
+                        color = colors.textMuted
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // User attribution banner
                     Surface(
-                        color = PastelPinkContainer,
+                        color = colors.pinkContainer,
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -142,7 +143,7 @@ fun PortfolioScreen(
                             text = "Created by deekshitha for my personal student portfolio app",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontStyle = FontStyle.Italic,
-                                color = PastelPinkOnContainer
+                                color = colors.pinkOnContainer
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -154,21 +155,43 @@ fun PortfolioScreen(
                     Text(
                         text = profile.portfolioBio,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = PastelTextSecondary,
+                        color = colors.textSecondary,
                         textAlign = TextAlign.Center,
                         lineHeight = 20.sp
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedButton(
-                        onClick = { showEditDialog = true },
-                        shape = RoundedCornerShape(18.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PastelLavenderPrimary)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Edit Profile Details", style = MaterialTheme.typography.labelMedium)
+                        OutlinedButton(
+                            onClick = { showEditDialog = true },
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.lavenderPrimary)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Edit Details", style = MaterialTheme.typography.labelMedium)
+                        }
+
+                        FilledTonalButton(
+                            onClick = onToggleTheme,
+                            shape = RoundedCornerShape(18.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = colors.lavenderContainer,
+                                contentColor = colors.lavenderPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = if (colors.isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                contentDescription = "Toggle Theme",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(if (colors.isDark) "Light" else "Dark", style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                 }
             }
@@ -186,24 +209,24 @@ fun PortfolioScreen(
                     title = "CGPA",
                     value = "%.2f".format(profile.cgpa),
                     sub = "Target: ${profile.targetCgpa}",
-                    color = PastelLavenderPrimary,
-                    containerColor = PastelLavenderContainer,
+                    color = colors.lavenderPrimary,
+                    containerColor = colors.lavenderContainer,
                     modifier = Modifier.weight(1f)
                 )
                 MilestoneStatCard(
                     title = "SGPA",
                     value = "%.2f".format(profile.currentSgpa),
                     sub = "Sem VI Current",
-                    color = PastelSageMint,
-                    containerColor = PastelMintContainer,
+                    color = colors.mintPrimary,
+                    containerColor = colors.mintContainer,
                     modifier = Modifier.weight(1f)
                 )
                 MilestoneStatCard(
                     title = "Standing",
                     value = "Top 5%",
                     sub = "In CSE Batch",
-                    color = PastelBlushPink,
-                    containerColor = PastelPinkContainer,
+                    color = colors.pinkPrimary,
+                    containerColor = colors.pinkContainer,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -216,8 +239,8 @@ fun PortfolioScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = PastelSurface),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+                colors = CardDefaults.cardColors(containerColor = colors.surface),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
             ) {
                 Column(
                     modifier = Modifier
@@ -228,7 +251,7 @@ fun PortfolioScreen(
                         text = "Technical Skill Stack",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary
+                        color = colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -240,13 +263,13 @@ fun PortfolioScreen(
                     ) {
                         profile.technicalSkills.forEach { skill ->
                             Surface(
-                                color = PastelLavenderContainer,
+                                color = colors.lavenderContainer,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
                                     text = skill,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = PastelLavenderOnContainer,
+                                    color = colors.lavenderOnContainer,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                                 )
@@ -268,7 +291,7 @@ fun PortfolioScreen(
                     text = "Engineering & Academic Projects",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary
+                    color = colors.textPrimary
                 )
             }
         }
@@ -278,7 +301,7 @@ fun PortfolioScreen(
                 title = "Deekshii - Academic Sanctuary & Schedule Hub",
                 tag = "Android & Jetpack Compose",
                 description = "Personal student portfolio app designed for female B.Tech students to track daily schedules, exam deadlines, attendance thresholds, marks visual trends, and collaborative peer forums.",
-                accentColor = PastelLavenderPrimary
+                accentColor = colors.lavenderPrimary
             )
         }
 
@@ -287,7 +310,7 @@ fun PortfolioScreen(
                 title = "Breast Cancer Classification with SVMs",
                 tag = "Machine Learning & Python",
                 description = "Implemented RBF and Polynomial kernel SVM models to classify medical diagnostic records with 96.8% accuracy. Completed as ML Lab Experiment 7.",
-                accentColor = PastelSageMint
+                accentColor = colors.mintPrimary
             )
         }
 
@@ -296,7 +319,7 @@ fun PortfolioScreen(
                 title = "Multi-Client TCP Chat Server",
                 tag = "Computer Networks & Sockets",
                 description = "Engineered a concurrent client-server communication protocol with asynchronous threading and socket timeout handling. Documented for peer sharing in study forum.",
-                accentColor = PastelSkyBlue
+                accentColor = colors.skyPrimary
             )
         }
     }
@@ -377,7 +400,10 @@ fun PortfolioScreen(
                         )
                         showEditDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PastelLavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.lavenderPrimary,
+                        contentColor = if (colors.isDark) Color(0xFF1B1429) else Color.White
+                    )
                 ) {
                     Text("Save Changes")
                 }
@@ -401,6 +427,7 @@ fun MilestoneStatCard(
     containerColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val colors = DeekshiiTheme.colors
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
@@ -413,11 +440,11 @@ fun MilestoneStatCard(
                 .padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = title, style = MaterialTheme.typography.labelSmall, color = PastelTextSecondary)
+            Text(text = title, style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
             Spacer(modifier = Modifier.height(2.dp))
             Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = color)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = sub, style = MaterialTheme.typography.labelSmall, color = PastelTextMuted, fontSize = 10.sp)
+            Text(text = sub, style = MaterialTheme.typography.labelSmall, color = colors.textMuted, fontSize = 10.sp)
         }
     }
 }
@@ -429,14 +456,15 @@ fun ProjectShowcaseCard(
     description: String,
     accentColor: Color
 ) {
+    val colors = DeekshiiTheme.colors
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -452,7 +480,7 @@ fun ProjectShowcaseCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PastelTextPrimary,
+                    color = colors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 Surface(
@@ -474,7 +502,7 @@ fun ProjectShowcaseCard(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = PastelTextSecondary,
+                color = colors.textSecondary,
                 lineHeight = 18.sp
             )
         }

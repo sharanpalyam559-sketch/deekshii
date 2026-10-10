@@ -33,6 +33,7 @@ fun AttendanceTrendDiagram(
     modifier: Modifier = Modifier,
     onSubjectClick: (SubjectRecord) -> Unit = {}
 ) {
+    val colors = DeekshiiTheme.colors
     var selectedSubjectId by remember { mutableStateOf<String?>(null) }
     val selectedSubject = subjects.find { it.id == selectedSubjectId }
 
@@ -41,9 +42,9 @@ fun AttendanceTrendDiagram(
             .fillMaxWidth()
             .testTag("attendance_trend_diagram_card"),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -60,18 +61,18 @@ fun AttendanceTrendDiagram(
                         text = "Attendance Visualizer",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary
+                        color = colors.textPrimary
                     )
                     Text(
                         text = "Comparative semester trend vs 75% cutoff",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
 
                 // Legend chip
                 Surface(
-                    color = PastelMintContainer,
+                    color = colors.mintContainer,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
@@ -81,13 +82,13 @@ fun AttendanceTrendDiagram(
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .background(PastelSageMint, CircleShape)
+                                .background(colors.mintPrimary, CircleShape)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "≥ 75% Safe",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelMintOnContainer
+                            color = colors.mintOnContainer
                         )
                     }
                 }
@@ -118,7 +119,7 @@ fun AttendanceTrendDiagram(
                     // Draw 75% Reference Threshold Line
                     val cutoffY = height * (1f - 0.75f)
                     drawLine(
-                        color = Color(0xFFF06292).copy(alpha = 0.65f),
+                        color = colors.pinkPrimary.copy(alpha = 0.85f),
                         start = Offset(0f, cutoffY),
                         end = Offset(width, cutoffY),
                         strokeWidth = 2.dp.toPx(),
@@ -128,7 +129,7 @@ fun AttendanceTrendDiagram(
                     // Draw 50% faint grid line
                     val halfY = height * 0.5f
                     drawLine(
-                        color = PastelSurfaceOutline.copy(alpha = 0.5f),
+                        color = colors.outline.copy(alpha = 0.5f),
                         start = Offset(0f, halfY),
                         end = Offset(width, halfY),
                         strokeWidth = 1.dp.toPx()
@@ -147,15 +148,15 @@ fun AttendanceTrendDiagram(
                         val barBrush = if (isSafe) {
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0xFF81C784),
-                                    Color(0xFF6FBA8C)
+                                    colors.mintPrimary,
+                                    colors.mintPrimary.copy(alpha = 0.75f)
                                 )
                             )
                         } else {
                             Brush.verticalGradient(
                                 colors = listOf(
-                                    Color(0xFFF48FB1),
-                                    Color(0xFFE57373)
+                                    colors.pinkPrimary,
+                                    colors.pinkPrimary.copy(alpha = 0.75f)
                                 )
                             )
                         }
@@ -169,9 +170,8 @@ fun AttendanceTrendDiagram(
                         )
 
                         if (isSelected) {
-                            // Highlight stroke for selected
                             drawRoundRect(
-                                color = PastelLavenderDark,
+                                color = colors.lavenderPrimary,
                                 topLeft = Offset(x - 2.dp.toPx(), y - 2.dp.toPx()),
                                 size = Size(barWidth + 4.dp.toPx(), barHeight + 4.dp.toPx()),
                                 cornerRadius = CornerRadius(10.dp.toPx(), 10.dp.toPx()),
@@ -204,12 +204,12 @@ fun AttendanceTrendDiagram(
                             text = "${sub.attendancePercentage.toInt()}%",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = if (isSafe) PastelSageMint else Color(0xFFD81B60)
+                            color = if (isSafe) colors.mintPrimary else colors.pinkPrimary
                         )
                         Text(
                             text = sub.code.takeLast(4),
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextSecondary,
+                            color = colors.textSecondary,
                             fontSize = 10.sp
                         )
                     }
@@ -221,7 +221,7 @@ fun AttendanceTrendDiagram(
             // Selected Subject Details Toast/Card
             selectedSubject?.let { sub ->
                 Surface(
-                    color = if (sub.isSafeAttendance) PastelMintContainer else PastelPinkContainer,
+                    color = if (sub.isSafeAttendance) colors.mintContainer else colors.pinkContainer,
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -237,27 +237,26 @@ fun AttendanceTrendDiagram(
                                 text = "${sub.name} (${sub.code})",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PastelTextPrimary
+                                color = if (sub.isSafeAttendance) colors.mintOnContainer else colors.pinkOnContainer
                             )
                             Text(
                                 text = "${sub.attendedClasses} attended of ${sub.totalClasses} classes • ${sub.bunkStatusText}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PastelTextSecondary
+                                color = colors.textSecondary
                             )
                         }
                     }
                 }
             } ?: run {
-                // Default helpful tip
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Dashed pink line denotes 75% university cutoff threshold. Tap any bar for details.",
+                        text = "Dashed line denotes 75% university cutoff threshold. Tap any bar for details.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextMuted,
+                        color = colors.textMuted,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -271,14 +270,16 @@ fun MarksGrowthDiagram(
     subjects: List<SubjectRecord>,
     modifier: Modifier = Modifier
 ) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .testTag("marks_growth_diagram_card"),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Column(
             modifier = Modifier
@@ -295,24 +296,24 @@ fun MarksGrowthDiagram(
                         text = "Marks & Internal Trends",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = PastelTextPrimary
+                        color = colors.textPrimary
                     )
                     Text(
                         text = "Mid-1 vs Mid-2 score progression (out of 30)",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
 
                 // Legend
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(8.dp).background(PastelLavenderPrimary, CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(colors.lavenderPrimary, CircleShape))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Mid-1", style = MaterialTheme.typography.labelSmall, color = PastelTextSecondary)
+                    Text("Mid-1", style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Box(modifier = Modifier.size(8.dp).background(PastelSkyBlue, CircleShape))
+                    Box(modifier = Modifier.size(8.dp).background(colors.skyPrimary, CircleShape))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Mid-2", style = MaterialTheme.typography.labelSmall, color = PastelTextSecondary)
+                    Text("Mid-2", style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                 }
             }
 
@@ -342,7 +343,7 @@ fun MarksGrowthDiagram(
                     for (i in 1..3) {
                         val markLevelY = height * (1f - (i * 10f / maxMarks))
                         drawLine(
-                            color = PastelSurfaceOutline.copy(alpha = 0.4f),
+                            color = colors.outline.copy(alpha = 0.4f),
                             start = Offset(0f, markLevelY),
                             end = Offset(width, markLevelY),
                             strokeWidth = 1.dp.toPx()
@@ -356,7 +357,7 @@ fun MarksGrowthDiagram(
                         val mid1Height = height * (sub.mid1Marks.toFloat() / maxMarks).coerceIn(0f, 1f)
                         val mid1Y = height - mid1Height
                         drawRoundRect(
-                            color = PastelLavenderPrimary.copy(alpha = 0.85f),
+                            color = colors.lavenderPrimary.copy(alpha = 0.85f),
                             topLeft = Offset(groupStartX, mid1Y),
                             size = Size(barWidth, mid1Height),
                             cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
@@ -366,7 +367,7 @@ fun MarksGrowthDiagram(
                         val mid2Height = height * (sub.mid2Marks.toFloat() / maxMarks).coerceIn(0f, 1f)
                         val mid2Y = height - mid2Height
                         drawRoundRect(
-                            color = PastelSkyBlue.copy(alpha = 0.9f),
+                            color = colors.skyPrimary.copy(alpha = 0.9f),
                             topLeft = Offset(groupStartX + barWidth + 3.dp.toPx(), mid2Y),
                             size = Size(barWidth, mid2Height),
                             cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
@@ -386,13 +387,13 @@ fun MarksGrowthDiagram(
                             text = sub.code.takeLast(4),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = PastelTextPrimary,
+                            color = colors.textPrimary,
                             fontSize = 11.sp
                         )
                         Text(
                             text = "${sub.mid1Marks.toInt()} → ${sub.mid2Marks.toInt()}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextMuted,
+                            color = colors.textMuted,
                             fontSize = 9.5.sp
                         )
                     }
@@ -402,7 +403,7 @@ fun MarksGrowthDiagram(
             Spacer(modifier = Modifier.height(14.dp))
 
             Surface(
-                color = PastelLavenderContainer,
+                color = colors.lavenderContainer,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -413,7 +414,7 @@ fun MarksGrowthDiagram(
                     Text(
                         text = "📈 Growth Insight: Consistent upward trend in Mid-2 marks (+1.8 marks average gain across subjects).",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PastelLavenderOnContainer
+                        color = colors.lavenderOnContainer
                     )
                 }
             }
@@ -428,14 +429,16 @@ fun AcademicProgressRadialCard(
     sgpa: Double,
     modifier: Modifier = Modifier
 ) {
+    val colors = DeekshiiTheme.colors
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .testTag("academic_radial_card"),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = PastelSurface),
+        colors = CardDefaults.cardColors(containerColor = colors.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PastelSurfaceOutline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.outline)
     ) {
         Row(
             modifier = Modifier
@@ -456,7 +459,7 @@ fun AcademicProgressRadialCard(
 
                     // Background track
                     drawCircle(
-                        color = PastelLavenderLight,
+                        color = colors.lavenderLight,
                         radius = radius,
                         center = center,
                         style = Stroke(width = strokeW)
@@ -466,7 +469,7 @@ fun AcademicProgressRadialCard(
                     val sweepAngle = ((cgpa / 10.0) * 360.0).toFloat()
                     drawArc(
                         brush = Brush.sweepGradient(
-                            listOf(PastelLavenderPrimary, PastelBlushPink, PastelLavenderPrimary)
+                            listOf(colors.lavenderPrimary, colors.pinkPrimary, colors.lavenderPrimary)
                         ),
                         startAngle = -90f,
                         sweepAngle = sweepAngle,
@@ -482,12 +485,12 @@ fun AcademicProgressRadialCard(
                         text = "%.2f".format(cgpa),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = PastelLavenderPrimary
+                        color = colors.lavenderPrimary
                     )
                     Text(
                         text = "CGPA",
                         style = MaterialTheme.typography.labelSmall,
-                        color = PastelTextSecondary
+                        color = colors.textSecondary
                     )
                 }
             }
@@ -504,13 +507,13 @@ fun AcademicProgressRadialCard(
                         Text(
                             text = "Semester SGPA",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextSecondary
+                            color = colors.textSecondary
                         )
                         Text(
                             text = "%.2f".format(sgpa),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = PastelSageMint
+                            color = colors.mintPrimary
                         )
                     }
 
@@ -518,13 +521,13 @@ fun AcademicProgressRadialCard(
                         Text(
                             text = "Target CGPA",
                             style = MaterialTheme.typography.labelSmall,
-                            color = PastelTextSecondary
+                            color = colors.textSecondary
                         )
                         Text(
                             text = "%.2f".format(targetCgpa),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = PastelBlushPink
+                            color = colors.pinkPrimary
                         )
                     }
                 }
@@ -536,8 +539,8 @@ fun AcademicProgressRadialCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    color = PastelLavenderPrimary,
-                    trackColor = PastelLavenderLight,
+                    color = colors.lavenderPrimary,
+                    trackColor = colors.lavenderLight,
                     strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                 )
 
@@ -546,7 +549,7 @@ fun AcademicProgressRadialCard(
                 Text(
                     text = "96.9% of target achieved • Top 5% in CSE cohort",
                     style = MaterialTheme.typography.labelSmall,
-                    color = PastelTextMuted
+                    color = colors.textMuted
                 )
             }
         }
