@@ -1,0 +1,6 @@
+{
+  "name": "Deekshii",
+  "description": "Aesthetic academic schedule, attendance, marks tracker, exam deadlines, and collaborative study forum for B.Tech student Deekshitha.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
